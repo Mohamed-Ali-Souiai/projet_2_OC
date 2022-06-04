@@ -70,6 +70,18 @@ def pageIndexForCategory():
     return pageIndexCategory
 #pageIndexForCategory()
 
+def extractTitleCategory():
+    linkCategory=pageIndexForCategory()
+    titleCategory=[]
+    for link in linkCategory:
+        reponse=requests.get(link)
+        page=reponse.content
+        soup=BeautifulSoup(page,'html.parser')
+        title=soup.find('h1').text
+        titleCategory.append(title) 
+    return titleCategory
+
+
 
 #def etlCategoryBooks(linksCategory):#le lien de chaque livre ==> parcourir tout les lien des livre
 def transformLinkPageCategory(): #transformer tous les liens des categorie
