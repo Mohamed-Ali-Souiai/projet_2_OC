@@ -168,7 +168,7 @@ image=soupBook.find('img')
 src_image=url+'../../'+image['src']
 srcImage.append(src_image)
 
-with open("etl.csv","a") as fichier:
+with open("etl.csv","w") as fichier:
     writer = csv.writer(fichier,delimiter=',')
     writer.writerow(entete)
     for details in donneeLivre:
