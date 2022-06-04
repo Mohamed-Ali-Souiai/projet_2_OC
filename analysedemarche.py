@@ -10,6 +10,8 @@ y=0
 #def detailsBooks():
 category = categoryBooks(t) # le parametre t correspond aux classements des categories c'est pour parcourir tous les categories
 titleCategory = extractTitleCategory()
+titleCategory=extracTitleCategory[y]
+
 url=category[y]             # y correspond au page de category en cours
 reponsePageBook = requests.get(url)
 pageBook = reponsePageBook.content
