@@ -6,10 +6,11 @@ import csv
 
 #details de chaque livre
 t=1
+y=0
 #def detailsBooks():
-category = categoryBooks(t) # le parametre t correspond aux classements des categories
+category = categoryBooks(t) # le parametre t correspond aux classements des categories c'est pour parcourir tous les categories
 titleCategory = extractTitleCategory()
-url=category[t]
+url=category[y]             # y correspond au page de category en cours
 reponsePageBook = requests.get(url)
 pageBook = reponsePageBook.content
 soupBook = BeautifulSoup(pageBook,"html.parser")
