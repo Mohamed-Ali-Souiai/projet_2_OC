@@ -1,6 +1,37 @@
 import requests
 from bs4 import BeautifulSoup
 from math import *
+import csv
+
+
+#details de chaque livre
+t=1
+#def detailsBooks():
+category = categoryBooks(t) # le parametre t correspond aux classements des categories
+titleCategory = extractTitleCategory()
+url=category[t]
+reponsePageBook = requests.get(url)
+pageBook = reponsePageBook.content
+soupBook = BeautifulSoup(pageBook,"html.parser")
+
+title = soupBook.find('h1')
+titleBook=title.string
+
+paragraph=soupBook.find_all('p')
+description=paragraph[3].string
+
+td=soupBook.find_all('td')
+universal_product_code=td[0].string
+price_including_tax=td[2].string
+price_excluding_tax=td[3].string
+number_available=td[5].string
+review_rating=td[6].string
+
+image=soupBook.find('img')
+src_image=url+'../../'+image['src'] 
+    
+
+
 def categoryBooks(t):
     links=[]
     linkTransform=transformLinkPageCategory()
@@ -30,27 +61,10 @@ def categoryBooks(t):
     
     return links
 
-#details de chaque livre
-reponsePageBook = requests.get('https://books.toscrape.com/catalogue/chase-me-paris-nights-2_977/index.html')
-pageBook = reponsePageBook.content
-soupBook = BeautifulSoup(pageBook,"html.parser")
-title = soupBook.find('h1')
-#print(title.string)
-titleBook=title.string
-paragraph=soupBook.find_all('p')
-description=paragraph[3].string
-td=soupBook.find_all('td')
-universal_product_code=td[0].string
-price_including_tax=td[2].string
-price_excluding_tax=td[3].string
-number_available=td[5].string
-review_rating=td[6].string
-image=soupBook.find('img')
-src_image='https://books.toscrape.com/catalogue/chase-me-paris-nights-2_977/'+image['src']
+
 
 
 #page index de chaque categorie ==> parcourir tout les lien des categories
-import re
 def pageIndexForCategory():
     ul=[]
     linksCategory=[]
