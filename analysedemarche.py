@@ -1,4 +1,3 @@
-#coding:utf-8
 import requests
 from bs4 import BeautifulSoup
 from math import *
@@ -127,8 +126,8 @@ srcImage=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating']
 for x in range(t+1):
-    if x==4 or x==3 or x==11:
-        continue
+    #if x==4 or x==3 or x==11:
+        #continue
     y=len(categoryBooks(x)) # parcourir les livres , numero de chaque livre
     # le parametre t(de 1 au numbre max desc categorie) correspond aux classements des categories c'est pour parcourir tous les categories
     books = categoryBooks(x) 
@@ -171,7 +170,7 @@ for x in range(t+1):
         review_rating=td[6].string   
         donneeLivre.append(review_rating)
 
-        with open("etl.csv","a") as fichier:
+        with open("etl.csv","a",encoding='utf-8') as fichier:
             writer = csv.writer(fichier,delimiter=',')
             if test:
                 writer.writerow(entete)
