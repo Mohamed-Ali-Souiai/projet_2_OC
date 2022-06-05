@@ -75,7 +75,7 @@ def numberPagePerCategory():
 def categoryBooks(t):
     links=[]
     linkTransform=transformLinkPageCategory()
-    nombrePage=numberPagePerCategory() #tous les numbres de page des categorie en ordre avec transformLinkPageCategory()
+    nombrePage=numberPagePerCategory() #tous les numbres de page de chaque categorie en ordre avec transformLinkPageCategory()
 
     if (nombrePage[t])==0:
         url=linkTransform[t]    #ici je n'ai pas ajouté "index.html" alors que url fonctionne
@@ -116,61 +116,69 @@ def extractTitleCategory():
 
 
 #details de chaque livre
-t=0 # parcourir les categories
-y=0 # parcourir les livres
+t=1#len(pageIndexForCategory())-1 # parcourir les categories , numero de chaque categore
+
+test=1
 
 donneeLivre=[]
 
 srcImage=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating']
+for x in range(t+1):
+    y=len(categoryBooks(x)) # parcourir les livres , numero de chaque livre
+    # le parametre t(de 1 au numbre max desc categorie) correspond aux classements des categories c'est pour parcourir tous les categories
+    books = categoryBooks(x) 
 
-category = categoryBooks(t) # le parametre t correspond aux classements des categories c'est pour parcourir tous les categories
+    extracTitleCategory = extractTitleCategory()
+    titleCategory=extracTitleCategory[x] # y??
 
-extracTitleCategory = extractTitleCategory()
-titleCategory=extracTitleCategory[y]
+    for z in range(y):
+        donneeLivre.append(titleCategory)
 
-donneeLivre.append(titleCategory)
+        url=books[z]        #  z==>y(de 1 au numbre max des livres) correspond au url book en cours
+        reponsePageBook = requests.get(url)
+        pageBook = reponsePageBook.content
+        soupBook = BeautifulSoup(pageBook,"html.parser")
 
-url=category[y]        # y correspond au page de category en cours
-reponsePageBook = requests.get(url)
-pageBook = reponsePageBook.content
-soupBook = BeautifulSoup(pageBook,"html.parser")
+        donneeLivre.append(url)
 
-donneeLivre.append(url)
+        title = soupBook.find('h1')
+        titleBook=title.string
+        donneeLivre.append(titleBook)
 
-title = soupBook.find('h1')
-titleBook=title.string
-donneeLivre.append(titleBook)
+        paragraph=soupBook.find_all('p')
+        description=paragraph[3].string
+        donneeLivre.append(description)
 
-paragraph=soupBook.find_all('p')
-description=paragraph[3].string
-donneeLivre.append(description)
-
-td=soupBook.find_all('td')
-universal_product_code=td[0].string
-donneeLivre.append(universal_product_code)
+        td=soupBook.find_all('td')
+        universal_product_code=td[0].string
+        donneeLivre.append(universal_product_code)
 
 
-price_including_tax=td[2].string 
-donneeLivre.append(price_including_tax)
+        price_including_tax=td[2].string 
+        donneeLivre.append(price_including_tax)
 
-price_excluding_tax=td[3].string  
-donneeLivre.append(price_excluding_tax)
+        price_excluding_tax=td[3].string  
+        donneeLivre.append(price_excluding_tax)
 
-number_available=td[5].string
-donneeLivre.append(number_available)    
+        number_available=td[5].string
+        donneeLivre.append(number_available)    
 
-review_rating=td[6].string   
-donneeLivre.append(review_rating)
+        review_rating=td[6].string   
+        donneeLivre.append(review_rating)
 
-image=soupBook.find('img')
-src_image=url+'../../'+image['src']
-srcImage.append(src_image)
+        with open("etl.csv","a") as fichier:
+            writer = csv.writer(fichier,delimiter=',')
+            if test:
+                writer.writerow(entete)
+                test=0
+            #for details in donneeLivre:
+            #    ligne = [details]
+            writer.writerow(donneeLivre)
+        donneeLivre=[]
 
-with open("etl.csv","w") as fichier:
-    writer = csv.writer(fichier,delimiter=',')
-    writer.writerow(entete)
-    for details in donneeLivre:
-        ligne = [details]
-        writer.writerow(ligne)
+
+#image=soupBook.find('img')
+#src_image=url+'../../'+image['src']
+#srcImage.append(src_image)
