@@ -1,3 +1,4 @@
+#coding:utf-8
 import requests
 from bs4 import BeautifulSoup
 from math import *
@@ -116,7 +117,7 @@ def extractTitleCategory():
 
 
 #details de chaque livre
-t=1#len(pageIndexForCategory())-1 # parcourir les categories , numero de chaque categore
+t=len(pageIndexForCategory())-1 # parcourir les categories , numero de chaque categore
 
 test=1
 
@@ -126,6 +127,8 @@ srcImage=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating']
 for x in range(t+1):
+    if x==4:
+        continue
     y=len(categoryBooks(x)) # parcourir les livres , numero de chaque livre
     # le parametre t(de 1 au numbre max desc categorie) correspond aux classements des categories c'est pour parcourir tous les categories
     books = categoryBooks(x) 
@@ -173,8 +176,6 @@ for x in range(t+1):
             if test:
                 writer.writerow(entete)
                 test=0
-            #for details in donneeLivre:
-            #    ligne = [details]
             writer.writerow(donneeLivre)
         donneeLivre=[]
 
