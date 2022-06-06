@@ -120,10 +120,10 @@ def extractTitleCategory():
 t=len(pageIndexForCategory())-1 # parcourir les categories , numero de chaque categore
 test=1
 donneeLivre=[]
-srcImage=[]
+#srcImage=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
-        'price_excluding_tax','number_available','review_rating']
-
+        'price_excluding_tax','number_available','review_rating','image_url']
+compteur=1  #premiere ligne ajouter
 for x in range(t+1):
     
     y=len(categoryBooks(x)) # parcourir les livres , numero de chaque livre
@@ -168,6 +168,18 @@ for x in range(t+1):
         review_rating=td[6].string   
         donneeLivre.append(review_rating)
 
+        image=soupBook.find('img')
+        src_image=url+'../../'+image['src']
+        donneeLivre.append(src_image)
+
+
+        reponseimg=requests.get(src_image)
+        with open('img'+str(compteur)+'.jpg','wb') as f:
+            f.write(reponseimg.content)
+
+
+
+
         with open("etl.csv","a",encoding='utf-8') as fichier:
             writer = csv.writer(fichier,delimiter=',')
             if test:
@@ -175,6 +187,7 @@ for x in range(t+1):
                 test=0
             writer.writerow(donneeLivre)
         donneeLivre=[]
+        compteur+=1 #2eme ligne ajouter
 
 
 #image=soupBook.find('img')
