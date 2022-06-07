@@ -117,16 +117,15 @@ def extractTitleCategory():
 
 #details de chaque livre
 
-t=len(pageIndexForCategory())-1 # parcourir les categories , numero de chaque categore
-test=1
+t=len(pageIndexForCategory())-1 # parcourir les categories ,t correspond au classement de chaque categore dans la liste
 donneeLivre=[]
 #srcImage=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating','image_url']
-compteur=1  #premiere ligne ajouter
+compteur=1 
 for x in range(t+1):
-    
-    y=len(categoryBooks(x)) # parcourir les livres , numero de chaque livre
+    test=1
+    y=len(categoryBooks(x)) # parcourir les livres , classement de chaque livre dans la liste
     # le parametre t(de 1 au numbre max desc categorie) correspond aux classements des categories c'est pour parcourir tous les categories
     books = categoryBooks(x) 
 
@@ -174,20 +173,20 @@ for x in range(t+1):
 
 
         reponseimg=requests.get(src_image)
-        with open('img'+str(compteur)+'.jpg','wb') as f:
+        with open('images/book'+titleCategory+str(compteur)+'.jpg','wb') as f:
             f.write(reponseimg.content)
 
 
 
 
-        with open("etl.csv","a",encoding='utf-8') as fichier:
+        with open("etl"+titleCategory+".csv","a",encoding='utf-8') as fichier:
             writer = csv.writer(fichier,delimiter=',')
             if test:
                 writer.writerow(entete)
                 test=0
             writer.writerow(donneeLivre)
         donneeLivre=[]
-        compteur+=1 #2eme ligne ajouter
+        compteur+=1 
 
 
 #image=soupBook.find('img')
