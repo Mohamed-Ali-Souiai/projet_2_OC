@@ -1,8 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
-from math import *
+from math import ceil
 import csv
 
+def parserReponse(url):
+    reponseCategory = requests.get(url)
+    page = reponseCategory.content
+    soup = BeautifulSoup(page,"html.parser")
+    return soup
 
 #page index de chaque categorie ==> parcourir tout les lien des categories
 def pageIndexForCategory():
@@ -11,53 +16,34 @@ def pageIndexForCategory():
     pageIndexCategory=[]
 
     url='http://books.toscrape.com/index.html'
-    reponseCategory = requests.get(url)
-    pageCategory = reponseCategory.content
-    soup = BeautifulSoup(pageCategory,"html.parser")
+    soup=parserReponse(url)
     ul = soup.find_all('ul')
     linksCategory = ul[2].find_all('a')
 
     for urlcat in linksCategory:
         adress='http://books.toscrape.com/'+urlcat['href']
-        pageIndexCategory.append(adress)
+        newUrl=adress.replace("index.html","")
+        pageIndexCategory.append(newUrl)
         
     return pageIndexCategory
 
-
-
-#transformer ou prepare tous les Urls des categorie
-def transformLinkPageCategory(): 
-    
-    pageIndexCategory=pageIndexForCategory() #contient tous les page index des categorie
-    pageUrl=[]
-    numberPageCategory=[]
-    nombreCategory=len(pageIndexCategory)
-    
-    for index in range(nombreCategory):
-        newUrl=pageIndexCategory[index].replace("index.html","")
-        pageUrl.append(newUrl)  
-    return pageUrl
-
-
+pageCategory=pageIndexForCategory()
 # retourne le nombre de livre de chaque categorie 
 def etlNumberOfBooks(link):
-    urlNumberPage=link
-    reponseNumberPage=requests.get(urlNumberPage)
-    soupNumberPage = BeautifulSoup(reponseNumberPage.content,'html.parser')
+    soupNumberPage=parserReponse(link)
     strongNumberPage = soupNumberPage.find_all('strong')
     numberOfBooks=strongNumberPage[1].text
     return int(numberOfBooks)
 
 
 # retourne nombre de page par categorie
-def numberPagePerCategory():
+def numberPagePerCategory(pageCat):
     
-    pageIndexCategory=pageIndexForCategory() #contient tous les page index des categorie
     numberPageCategory=[]
     #extraire les url des categories qui on 2 page ou plus
-    nombreCategory=len(pageIndexCategory)
+    nombreCategory=len(pageCat)
     for index in range(nombreCategory):
-        NumberOfBooks = etlNumberOfBooks(pageIndexCategory[index])
+        NumberOfBooks = etlNumberOfBooks(pageCat[index])
         if NumberOfBooks>20:# 20==>nombre livrepar page NumberOfBooks==> nombre de livre/categorie
             numberPage = ceil(NumberOfBooks/20)
             numberPageCategory.append(numberPage)
@@ -67,29 +53,24 @@ def numberPagePerCategory():
         
     return numberPageCategory
 
+numPageCat=numberPagePerCategory(pageCategory)
 
 # retourne url de livre de la categorie passer en parametre
-def categoryBooks(t):
+def categoryBooks(t,npg,pageCat):
     links=[]
-    linkTransform=transformLinkPageCategory()
-    nombrePage=numberPagePerCategory() #tous les numbres de page de chaque categorie en ordre avec transformLinkPageCategory()
 
-    if (nombrePage[t])==0:
-        url=linkTransform[t]   
-        reponse=requests.get(url)
-        page=reponse.content
-        soupCategory=BeautifulSoup(page,"html.parser")
+    if (npg[t])==0:
+        url=pageCat[t]
+        soupCategory=parserReponse(url)       
         titleBooks = soupCategory.find_all('h3')
         for book in titleBooks:
             a=book.find('a')
             href=url+a['href']
             links.append(href)
     else:
-        for i in range(1,nombrePage[t]+1):
-            url=linkTransform[t]+'page-'+str(i)+'.html'
-            reponse=requests.get(url)
-            page=reponse.content
-            soupCategory=BeautifulSoup(page,"html.parser")
+        for i in range(1,npg[t]+1):
+            url=pageCat[t]+'page-'+str(i)+'.html'
+            soupCategory=parserReponse(url)
             titleBooks = soupCategory.find_all('h3')
             for book in titleBooks:
                 a=book.find('a')
@@ -98,41 +79,23 @@ def categoryBooks(t):
     return links
 
 
-#retoune liste de tous les titres de categorie
-def extractTitleCategory():
-    linkCategory=pageIndexForCategory()
-    titleCategory=[]
-    for link in linkCategory:
-        reponse=requests.get(link)
-        page=reponse.content
-        soup=BeautifulSoup(page,'html.parser')
-        title=soup.find('h1').text
-        titleCategory.append(title) 
-    return titleCategory
-
-
-
 #les details des livres par categorie
-t=len(pageIndexForCategory())-1 
+t=0#len(pageCategory)-1 
 donneeLivre=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating','image_url']
 compteur=1 
 for x in range(t+1): #pour parcourir tous les categories
     test=1
-    y=len(categoryBooks(x)) 
-    books = categoryBooks(x) 
-
-    extracTitleCategory = extractTitleCategory()
-    titleCategory=extracTitleCategory[x] 
-
+    y=len(categoryBooks(x,numPageCat,pageCategory)) 
+    books = categoryBooks(x,numPageCat,pageCategory) 
     for z in range(y):  # pour parcourir tous les livres de la meme categorie
-        donneeLivre.append(titleCategory)
 
-        url=books[z]        
-        reponsePageBook = requests.get(url)
-        pageBook = reponsePageBook.content
-        soupBook = BeautifulSoup(pageBook,"html.parser")
+        url=books[z]
+        soupBook=parserReponse(url)
+        tc = soupBook.find_all('a')
+        titleCategory=tc[3].text
+        donneeLivre.append(titleCategory)
 
         donneeLivre.append(url)
 
@@ -167,11 +130,11 @@ for x in range(t+1): #pour parcourir tous les categories
 
         #charge les images
         reponseimg=requests.get(src_image)
-        with open('images/book'+titleCategory+str(compteur)+'.jpg','wb') as f:
+        with open(f'{titleCategory}_Book_{compteur}.jpg','wb') as f:
             f.write(reponseimg.content)
 
         #charge tous les details des livres par categories
-        with open("etl"+titleCategory+".csv","a",encoding='utf-8') as fichier:
+        with open(f'etl_{titleCategory}.csv',"a",encoding='utf-8') as fichier:
             writer = csv.writer(fichier,delimiter=',')
             if test:
                 writer.writerow(entete)
