@@ -80,7 +80,7 @@ def categoryBooks(t,npg,pageCat):
 
 
 #les details des livres par categorie
-t=0#len(pageCategory)-1 
+t=len(pageCategory)-1 
 donneeLivre=[]
 entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
         'price_excluding_tax','number_available','review_rating','image_url']
