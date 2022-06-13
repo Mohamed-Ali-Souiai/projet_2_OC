@@ -1,6 +1,8 @@
 # projet_2_OC
 etl de site books.toscrape
+
 Il faut créer un répertoire  « data » au même emplacement que le fichier du script
+
 créer l'environnement virtuel sous Windows
 dans l'invite de commande vous accédez au répertoire que le fichier d’exécution  a été charger (la commande CD <nom de répertoire>
 puis pour créer  l'environnement virtuel vous tapez==> python -m venv env
