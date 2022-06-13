@@ -48,7 +48,6 @@ def numberPagePerCategory(pageCat):
             numberPage = ceil(NumberOfBooks/20)
             numberPageCategory.append(numberPage)
         else:
-            onePage=0
             numberPageCategory.append(0)
         
     return numberPageCategory
@@ -65,8 +64,7 @@ def categoryBooks(t,npg,pageCat):
         titleBooks = soupCategory.find_all('h3')
         for book in titleBooks:
             a=book.find('a')
-            href=url+a['href']
-            links.append(href)
+            links.append('http://books.toscrape.com/catalogue'+a['href'].replace("../../..",""))
     else:
         for i in range(1,npg[t]+1):
             url=pageCat[t]+'page-'+str(i)+'.html'
@@ -74,16 +72,15 @@ def categoryBooks(t,npg,pageCat):
             titleBooks = soupCategory.find_all('h3')
             for book in titleBooks:
                 a=book.find('a')
-                href=url+'../../'+a['href']
-                links.append(href)
+                links.append('http://books.toscrape.com/catalogue'+a['href'].replace("../../..",""))
     return links
 
 
 #les details des livres par categorie
 t=len(pageCategory)-1 
 donneeLivre=[]
-entete=['category','product_page_url','title','product_description','universal_ product_code','price_including_tax',
-        'price_excluding_tax','number_available','review_rating','image_url']
+entete=['product_page_url','title','product_description','universal_ product_code','price_including_tax',
+        'price_excluding_tax','number_available','category','review_rating','image_url']
 compteur=1 
 for x in range(t+1): #pour parcourir tous les categories
     test=1
@@ -93,10 +90,7 @@ for x in range(t+1): #pour parcourir tous les categories
 
         url=books[z]
         soupBook=parserReponse(url)
-        tc = soupBook.find_all('a')
-        titleCategory=tc[3].text
-        donneeLivre.append(titleCategory)
-
+        
         donneeLivre.append(url)
 
         title = soupBook.find('h1')
@@ -119,22 +113,26 @@ for x in range(t+1): #pour parcourir tous les categories
         donneeLivre.append(price_excluding_tax)
 
         number_available=td[5].string
-        donneeLivre.append(number_available)    
+        donneeLivre.append(number_available)  
+        #modifie
+        tc = soupBook.find_all('a')
+        titleCategory=tc[3].text
+        donneeLivre.append(titleCategory)  
 
         review_rating=td[6].string   
         donneeLivre.append(review_rating)
 
         image=soupBook.find('img')
         src_image=url+'../../'+image['src']
-        donneeLivre.append(src_image)
+        donneeLivre.append('http://books.toscrape.com'+image['src'].replace("../..",""))
 
         #charge les images
         reponseimg=requests.get(src_image)
-        with open(f'{titleCategory}_Book_{compteur}.jpg','wb') as f:
+        with open(f'data/{titleCategory}_Book_{compteur}.jpg','wb') as f:
             f.write(reponseimg.content)
 
         #charge tous les details des livres par categories
-        with open(f'etl_{titleCategory}.csv',"a",encoding='utf-8') as fichier:
+        with open(f'data/etl_{titleCategory}.csv',"a",encoding='utf-8') as fichier:
             writer = csv.writer(fichier,delimiter=',')
             if test:
                 writer.writerow(entete)
